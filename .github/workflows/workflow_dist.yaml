@@ -8,6 +8,11 @@ jobs:
         steps:
             - name: "greet"
               run: echo "hello World!"
+    clone-repo:
+        runs-on: ubuntu-latest
+        steps:
+            - name: "clone repo"
+              uses: actions/checkout@v4
               
 
         
