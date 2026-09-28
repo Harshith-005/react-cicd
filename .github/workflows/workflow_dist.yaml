@@ -10,12 +10,12 @@ on:
          - README.md
     workflow_dispatch:
 jobs:
-    test:
+    greet:
         runs-on: ubuntu-latest
         steps:
             - name: "greet"
               run: echo "hello World!"
-    clone-repo:
+    test:
         runs-on: ubuntu-latest
         steps:
             - name: "clone repo"
@@ -37,25 +37,42 @@ jobs:
               run: npm ci
             - name: "run test"
               run: npm test
-    deploy:
+    build:
         needs: test
         runs-on: ubuntu-latest
         steps:
           - name: "get code"
             uses: actions/checkout@v4
-
           - name: "install node"
             uses: actions/setup-node@v4
-          - name: Cache Dependencies
+            with:
+              node-version: 20
+          - name: "cache dependencies"
             uses: actions/cache@v4
             with:
-              path: ~/.npm
-              key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+               path: ~/.npm
+               key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}  
           - name: "install dependencies"
             run: npm ci
-          - name: "build the project"
-            run: npm run build 
+          - name: "build"
+            run: npm run build
+          - name: "upload dist artifact"
+            uses: actions/upload-artifact@v4
+            with:
+              name: dist-file
+              path: dist
 
+
+
+    deploy:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+          - name: download dist artifact
+            uses: actions/download-artifact@v4
+            with:
+              name: dist-file
+              path: dist
           - name: "deploy"
             run: echo "deploued successfully"
 
